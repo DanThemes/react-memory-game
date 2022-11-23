@@ -1,35 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const Grid = ({ grid }: { grid: Array<number> }) => {
-  const [visible, setVisible] = useState<number[]>([]);
+// enum GridCellStatus {
+//   INITIAL = "initial",
+//   SELECTED = "selected",
+//   COMPLETED = "completed",
+// }
 
-  const handleCellClick = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.target as HTMLDivElement;
-    console.log(e.target);
-    const value = Number(
-      target.querySelector(".grid-cell-content")?.textContent ||
-        target.closest(".grid-cell-content")?.textContent
-    );
+const Grid = ({ grid, setGrid }) => {
+  const [visible, setVisible] = useState<string[]>([]);
 
+  const checkPairs() => {
+
+  }
+
+  const handleCellClick = (id: string) => {
     if (visible.length < 2) {
-      if (value !== undefined) {
-        setVisible(() => [...visible, value]);
+      if (id !== undefined) {
+        setGrid(() =>
+          grid.map((cell) =>
+            cell.id === id ? { ...cell, status: "selected" } : cell
+          )
+        );
+        setVisible(() => [...visible, id]);
       }
-    } else {
-      //TODO: add delay
-      //TODO: remove visible elements from the grid
-
-      setVisible(() => []);
     }
   };
+
+  useEffect(() => {
+    if (visible.length == 2) {
+      
+      // setGrid(() => grid.map((cell) => ({ ...cell, status: "initial" })));
+      // setVisible(() => []);
+    }
+  }, [visible]);
 
   return (
     <>
       {JSON.stringify(visible, null, 2)}
       <div className="grid">
-        {grid.map((cell, idx) => (
-          <div className="grid-cell" onClick={handleCellClick} key={idx}>
-            <div className="grid-cell-content">{cell}</div>
+        {grid.map(({ id, value, status }) => (
+          <div
+            onClick={() => handleCellClick(id)}
+            key={id}
+            className={`grid-cell ${status === "selected" ? "selected" : ""}`}
+          >
+            <div className="grid-cell-content">{value}</div>
           </div>
         ))}
       </div>
