@@ -1,65 +1,64 @@
-import { useState } from "react";
-
-// enum GridCellStatus {
-//   INITIAL = "initial",
-//   SELECTED = "selected",
-//   COMPLETED = "completed",
-// }
-
-interface GridCell {
-  id: string;
-  value: string;
-  status: string;
-}
+import { useEffect, useState } from "react";
+import { GridCell } from "../App";
+import { GridCellStatus } from "../App";
 
 interface GridProps {
-  grid: [];
+  grid: GridCell[];
   setGrid: any;
 }
 
 const Grid = ({ grid, setGrid }: GridProps) => {
   const [visible, setVisible] = useState<GridCell[]>([]);
 
-  const checkPairs = () => {
-    if (visible[0].value === visible[1].value) {
-      setGrid((prev: GridCell[]) => {
-        prev.map((cell: GridCell) => {
-          if (cell.id === visible[0].value || cell.id === visible[1].value) {
-            return { ...cell, status: "completed" };
-          }
-          return cell;
-        });
-      });
-    }
-  };
+  const checkPairEquality = (grid: GridCell[], visible: GridCell[]) => {
+    if (visible.length !== 2) return;
 
-  const handleCellClick = (cell: GridCell) => {
-    if (visible.length === 1) {
-      checkPairs();
-      setGrid((prev: GridCell[]) =>
-        prev.map((cell: GridCell) => {
-          if (cell.status === "selected") {
-            return { ...cell, status: "initial" };
+    if (visible[0].value === visible[1].value) {
+      setGrid(
+        grid.map((cell: GridCell) => {
+          if (cell.id === visible[0].id || cell.id === visible[1].id) {
+            return { ...cell, status: GridCellStatus.Completed };
           }
           return cell;
         })
       );
-      setVisible(() => []);
-    } else if (visible.length < 2) {
-      // console.log(cell);
-      const id = cell.id;
-      setGrid((prev: GridCell[]) =>
-        prev.map((cell: GridCell) =>
-          cell.id === id ? { ...cell, status: "selected" } : cell
-        )
-      );
-      setVisible(() => [...visible, cell]);
+    } else {
+      setTimeout(() => {
+        setGrid(
+          grid.map((cell: GridCell) => {
+            if (cell.id === visible[0].id || cell.id === visible[1].id) {
+              return { ...cell, status: GridCellStatus.Initial };
+            }
+            return cell;
+          })
+        );
+      }, 500);
     }
+
+    setVisible([]);
   };
+
+  const handleCellClick = ({ id, status, value }: GridCell) => {
+    if (status !== GridCellStatus.Initial) return;
+
+    setVisible((prev) => [...prev, { id, status, value }]);
+
+    setGrid((prev: GridCell[]) =>
+      prev.map((cell: GridCell) =>
+        cell.id === id ? { ...cell, status: GridCellStatus.Selected } : cell
+      )
+    );
+  };
+
+  useEffect(() => {
+    checkPairEquality(grid, visible);
+  }, [grid, visible]);
 
   return (
     <>
-      {JSON.stringify(visible, null, 2)}
+      {/* {JSON.stringify(visible, null, 2)} */}
+      {/* <br /> */}
+      {/* {JSON.stringify(grid, null, 2)} */}
       <div className="grid">
         {grid.map((cell: GridCell) => (
           <div

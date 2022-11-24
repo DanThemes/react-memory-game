@@ -13,6 +13,19 @@
   cursor: pointer;
   transition: 0.2s ease all;
 }
-.grid-cell:hover {
+.grid-cell.initial:hover {
   background-color: rgba(128, 229, 202, 0.198);
+}
+
+.grid-cell-content {
+  visibility: hidden;
+}
+
+.selected .grid-cell-content,
+.completed .grid-cell-content {
+  visibility: visible;
+}
+.selected,
+.completed {
+  background-color: rgb(128 229 202);
 }

@@ -3,22 +3,41 @@ import { v4 as uuidv4 } from "uuid";
 import Grid from "./components/Grid";
 import { useState } from "react";
 
-const generateGrid = () => {
-  return Array(9)
+export enum GridCellStatus {
+  Initial = "initial",
+  Selected = "selected",
+  Completed = "completed",
+}
+
+export interface GridCell {
+  id: string;
+  value: string;
+  status: GridCellStatus;
+}
+
+const generateGrid = (): GridCell[] => {
+  let grid = Array(6)
     .fill("")
     .map((cell) => ({
-      id: uuidv4(),
-      value: Math.floor(Math.random() * 3),
-      status: "initial",
+      id: "",
+      value: String(Math.floor(Math.random() * 3)),
+      status: GridCellStatus.Initial,
     }));
+  console.log(grid);
+  grid = grid
+    .concat(grid)
+    .map((cell) => ({ ...cell, id: uuidv4() }))
+    .sort();
+
+  console.log(grid);
+  return grid;
 };
 
 function App() {
-  const [grid, setGrid] = useState(generateGrid());
+  const [grid, setGrid] = useState<GridCell[]>(generateGrid());
 
   return (
     <div className="App">
-      {/* {JSON.stringify(generateGrid(), null, 2)} */}
       <Grid grid={grid} setGrid={setGrid} />
     </div>
   );
