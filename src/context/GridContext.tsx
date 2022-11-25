@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useState } from "react";
+import { createContext, Dispatch, useContext, useReducer } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { GRID_ACTIONS } from "./GridActions";
 
@@ -14,6 +14,11 @@ export interface GridCell {
   status: GridCellStatus;
 }
 
+interface StateInterface {
+  grid: GridCell[];
+  visible: GridCell[];
+}
+
 const generateGrid = (): GridCell[] => {
   let grid = Array(6)
     .fill("")
@@ -22,23 +27,42 @@ const generateGrid = (): GridCell[] => {
       value: String(Math.floor(Math.random() * 3)),
       status: GridCellStatus.Initial,
     }));
-  console.log(grid);
   grid = grid
     .concat(grid)
     .map((cell) => ({ ...cell, id: uuidv4() }))
     .sort();
 
-  console.log(grid);
   return grid;
 };
 
-const GridContext = createContext([]);
+interface GridContextInterface {
+  state: StateInterface;
+  dispatch: React.Dispatch<any>;
+}
+
+interface ReducerAction {
+  type: string;
+  payload?: { id?: string; cell?: GridCell };
+}
+
+const initialState = {
+  grid: generateGrid(),
+  visible: [],
+};
+
+const GridContext = createContext<{
+  state: StateInterface;
+  dispatch: Dispatch<any>;
+}>({ state: initialState, dispatch: () => null });
 
 export const useGridContext = () => {
   return useContext(GridContext);
 };
 
-const reducer = (state, action) => {
+const reducer = (
+  state: StateInterface,
+  action: ReducerAction
+): StateInterface => {
   switch (action.type) {
     case GRID_ACTIONS.STATUS_INITIAL:
       return {
@@ -53,6 +77,51 @@ const reducer = (state, action) => {
           return cell;
         }),
       };
+
+    case GRID_ACTIONS.STATUS_SELECTED:
+      return {
+        ...state,
+        grid: state.grid.map((cell: GridCell) =>
+          action.payload && cell.id === action.payload.cell!.id
+            ? { ...cell, status: GridCellStatus.Selected }
+            : cell
+        ),
+      };
+
+    case GRID_ACTIONS.STATUS_COMPLETED:
+      return {
+        ...state,
+        grid: state.grid.map((cell: GridCell) => {
+          if (
+            cell.id === state.visible[0].id ||
+            cell.id === state.visible[1].id
+          ) {
+            return { ...cell, status: GridCellStatus.Completed };
+          }
+          return cell;
+        }),
+      };
+
+    case GRID_ACTIONS.ADD_TO_VISIBLE:
+      return {
+        ...state,
+        visible: [...state.visible, action.payload!.cell!],
+      };
+
+    case GRID_ACTIONS.CLEAR_VISIBLE:
+      return {
+        ...state,
+        visible: [],
+      };
+
+    case GRID_ACTIONS.RESTART:
+      return {
+        grid: generateGrid(),
+        visible: [],
+      };
+
+    default:
+      return state;
   }
 };
 
@@ -65,7 +134,7 @@ export const GridContextProvider: React.FC<ProviderProps> = ({ children }) => {
   // const [grid, setGrid] = useState<GridCell[]>(generateGrid());
 
   const gridState = {
-    grid: [],
+    grid: generateGrid(),
     visible: [],
   };
 
