@@ -11,19 +11,22 @@ const Grid = () => {
   const checkPairEquality = (visible: GridCell[]) => {
     if (visible.length === 2) {
       if (visible[0].value === visible[1].value) {
-        dispatch({ type: GRID_ACTIONS.STATUS_COMPLETED });
-        dispatch({ type: GRID_ACTIONS.CLEAR_VISIBLE });
+        setTimeout(() => {
+          dispatch({ type: GRID_ACTIONS.STATUS_COMPLETED });
+          dispatch({ type: GRID_ACTIONS.CLEAR_VISIBLE });
+        }, 500);
       } else {
-        // setTimeout(() => {
-        dispatch({ type: GRID_ACTIONS.STATUS_INITIAL });
-        dispatch({ type: GRID_ACTIONS.CLEAR_VISIBLE });
-        // }, 500);
+        setTimeout(() => {
+          dispatch({ type: GRID_ACTIONS.STATUS_INITIAL });
+          dispatch({ type: GRID_ACTIONS.CLEAR_VISIBLE });
+        }, 500);
       }
     }
   };
 
   const handleCellClick = (cell: GridCell) => {
     if (cell.status !== GridCellStatus.Initial) return;
+    if (state.visible.length === 2) return;
     if (gameOver) return;
 
     dispatch({ type: GRID_ACTIONS.ADD_TO_VISIBLE, payload: { cell } });
